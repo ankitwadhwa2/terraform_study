@@ -1,0 +1,64 @@
+# pass variabe thru command line
+terraform apply -var "subnet_prefix = 10.0.1.0/24"
+
+# If dont use file terraform.tfvars, pass command line variable in case of variables in other file 
+terraform apply -var-file = example.tfvars
+
+# We can use aprameetr default to pass value in variable block
+
+ variable "sub_pre" {
+   description = "Enter Cidr Block"
+   #default
+   #type = string
+ }
+
+# List of variables can be used likes this:
+
+File  : terraform.tfvars
+
+sub_pre =[ "10.0.1.0/24","10.0.2.0/24"]
+
+File: main.tf
+
+ resource "aws_subnet" "main-subnet-1" {
+  vpc_id     = aws_vpc.first-vpc.id
+  cidr_block = var.sub_pre[0]
+
+  tags = {
+    Name = "Main"
+  }
+}
+
+ resource "aws_subnet" "main-subnet-2" {
+  vpc_id     = aws_vpc.first-vpc.id
+  cidr_block = var.sub_pre[1]
+
+  tags = {
+    Name = "Main"
+  }
+}
+
+# use variables as object
+
+File  : terraform.tfvars
+
+sub_pre=[{cidr_block= "10.0.1.0/24", name = "prod_subnet_1"},{cidr_block= "10.0.2.0/24", name = "prod_subnet_2"}]
+
+File: main.tf
+resource "aws_subnet" "main-subnet-1" {
+  vpc_id     = aws_vpc.first-vpc.id
+  cidr_block = var.sub_pre[0].cidr_block
+
+  tags = {
+    Name = var.sub_pre[0].name
+  }
+}
+
+ resource "aws_subnet" "main-subnet-2" {
+  vpc_id     = aws_vpc.first-vpc.id
+  cidr_block = var.sub_pre[1].cidr_block
+
+  tags = {
+    Name = var.sub_pre[1].name
+  }
+}
